@@ -15,23 +15,24 @@ from .models import (
     Reviews,
     Comments,
     GengeTitle,
-    CsvImport,
 )
 
 
-@admin.register(CsvImport)
-class CsvImportAdmin(admin.ModelAdmin):
-    """Скрипт для импорта файлов csv формата через админ панель.
-    Все остальные классы наследуются от него."""
+class CsvImportAdmin():
+    """Скрипт для импорта файлов csv формата через админ панель."""
 
-    list_display = ('csv_file',)
+    def add_urls(self):
+        urls = admin.ModelAdmin.get_urls()
+        urls.insert(-1, path('csv-upload/', self.upload_csv))
+        return urls
 
-    def import_csv_file(self, request, model, fields):
+    def upload_csv(self, request, model, fields):
         if request.method == 'POST':
             form = CsvImportForm(request.POST, request.FILES)
             if form.is_valid():
                 # валидация формы
                 form_object = form.save()
+                form_object.save()
                 with form_object.csv_file.open('r') as csv_file:
                     rows = csv.reader(csv_file, delimiter=',')
                     if next(rows) != fields:
@@ -40,7 +41,8 @@ class CsvImportAdmin(admin.ModelAdmin):
 
                     for row in list(rows):
                         model_atribute = {}
-                        # отлавливаем имена полей с FK
+                        # отлавливаем имена полей с FK, что бы синхронизировать
+                        # с полями в б/д
                         fields_fk = [
                             f.name
                             for f in model._meta.get_fields()
@@ -69,15 +71,15 @@ class CsvImportAdmin(admin.ModelAdmin):
 
 
 @admin.register(Genre)
-class GenreAdmin(admin.ModelAdmin):
+class GenreAdmin(admin.ModelAdmin, CsvImportAdmin):
+
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             Genre,
             ['id', 'name', 'slug'],
@@ -85,15 +87,14 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 @admin.register(GengeTitle)
-class GengeTitleAdmin(admin.ModelAdmin):
+class GengeTitleAdmin(admin.ModelAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             GengeTitle,
             ['id', 'title_id', 'genre_id'],
@@ -101,15 +102,14 @@ class GengeTitleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Title)
-class TitleAdmin(admin.ModelAdmin):
+class TitleAdmin(admin.ModelAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             Title,
             ['id', 'name', 'year', 'category'],
@@ -117,15 +117,14 @@ class TitleAdmin(admin.ModelAdmin):
 
 
 @admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             Category,
             ['id', 'name', 'slug'],
@@ -133,15 +132,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(Reviews)
-class ReviewsAdmin(admin.ModelAdmin):
+class ReviewsAdmin(admin.ModelAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             Reviews,
             ['id', 'title_id', 'text', 'author', 'score', 'pub_date'],
@@ -149,15 +147,14 @@ class ReviewsAdmin(admin.ModelAdmin):
 
 
 @admin.register(Comments)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(admin.ModelAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             Comments,
             ['id', 'review_id', 'text', 'author', 'pub_date'],

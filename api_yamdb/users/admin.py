@@ -6,15 +6,14 @@ from reviews.admin import CsvImportAdmin
 from .models import MyUser
 
 
-class MyUserAdmin(UserAdmin):
+class MyUserAdmin(UserAdmin, CsvImportAdmin):
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
         return urls
 
     def upload_csv(self, request):
-        return CsvImportAdmin.import_csv_file(
-            self,
+        return super().upload_csv(
             request,
             MyUser,
             [
