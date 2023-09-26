@@ -21,11 +21,6 @@ from .models import (
 class CsvImportAdmin():
     """Скрипт для импорта файлов csv формата через админ панель."""
 
-    def add_urls(self):
-        urls = admin.ModelAdmin.get_urls()
-        urls.insert(-1, path('csv-upload/', self.upload_csv))
-        return urls
-
     def upload_csv(self, request, model, fields):
         if request.method == 'POST':
             form = CsvImportForm(request.POST, request.FILES)
