@@ -10,6 +10,6 @@ router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/signup/', singup, name='singup'),
+    path('v1/auth/signup/', singup, name='signup'),
     path('v1/auth/token/', get_jwt_token, name='token')
 ]
