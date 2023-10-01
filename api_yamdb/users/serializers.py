@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+# from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import RegexValidator
 
 from .models import MyUser
 
@@ -7,7 +9,10 @@ from .models import MyUser
 class SignUpSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=150,
-        validators=[UniqueValidator(queryset=MyUser.objects.all())]
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Недопустимое имя'
+        ), UniqueValidator(queryset=MyUser.objects.all())]
     )
     email = serializers.EmailField(
         max_length=254,
@@ -32,7 +37,10 @@ class TokenSerializer(serializers.Serializer):
 class MyUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=150,
-        validators=[UniqueValidator(queryset=MyUser.objects.all())],
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Недопустимое имя'
+        ), UniqueValidator(queryset=MyUser.objects.all())],
         required=True,
     )
     email = serializers.EmailField(
@@ -47,6 +55,13 @@ class MyUserSerializer(serializers.ModelSerializer):
 
 
 class MyUserEditSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=150,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Недопустимое имя'
+        ), UniqueValidator(queryset=MyUser.objects.all())]
+    )
 
     class Meta:
         fields = ('username', 'email', 'first_name',

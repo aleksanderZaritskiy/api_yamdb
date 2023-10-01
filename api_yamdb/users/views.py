@@ -3,11 +3,15 @@ from http import HTTPStatus
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, viewsets
-from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework import permissions, viewsets, filters
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+# from django.conf import settings
+# from rest_framework.views import APIView
+# from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.decorators import api_view, permission_classes
 
 from .permissions import IsAdmin
 from .serializers import (SignUpSerializer, MyUserSerializer,
@@ -60,6 +64,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = MyUserSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAdmin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('=username',)
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     @action(
