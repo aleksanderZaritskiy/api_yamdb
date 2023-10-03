@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0018_alter_myuser_username'),
     ]
@@ -16,6 +15,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='myuser',
-            constraint=models.CheckConstraint(check=models.Q(_negated=True, username__iexact='me'), name='username_is_not_me'),
+            constraint=models.CheckConstraint(
+                check=models.Q(_negated=True, username__iexact='me'),
+                name='username_is_not_me',
+            ),
         ),
     ]

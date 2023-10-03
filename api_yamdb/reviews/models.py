@@ -53,7 +53,7 @@ class GengeTitle(models.Model):
         return f'{self.title} : {self.genre}'
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -73,6 +73,11 @@ class Reviews(models.Model):
 
     class Meta:
         verbose_name_plural = 'Reviews'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'], name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.text[:50]
@@ -85,7 +90,7 @@ class Comments(models.Model):
         related_name='title_comments',
     )
     review = models.ForeignKey(
-        Reviews,
+        Review,
         on_delete=models.CASCADE,
         related_name='review_comments',
     )

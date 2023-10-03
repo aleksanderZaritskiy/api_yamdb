@@ -13,6 +13,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CHOICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 # Application definition
 
@@ -24,10 +25,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'api',
+    'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
+    'rest_framework',
+    'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -125,11 +127,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.'
-                                'PageNumberPagination',
+    'PageNumberPagination',
     "PAGE_SIZE": 10,
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=20),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }

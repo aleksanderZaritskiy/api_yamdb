@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0024_alter_myuser_username'),
     ]
@@ -14,6 +13,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='username',
-            field=models.CharField(max_length=150, null=True, unique=True, validators=[django.core.validators.RegexValidator(message='Недопустимое имя', regex='^[\\w.@+-]+$')]),
+            field=models.CharField(
+                max_length=150,
+                null=True,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message='Недопустимое имя', regex='^[\\w.@+-]+$'
+                    )
+                ],
+            ),
         ),
     ]

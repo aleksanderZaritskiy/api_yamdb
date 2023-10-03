@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0004_remove_myuser_confirmation_code'),
     ]
@@ -13,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='email',
-            field=models.EmailField(blank=True, max_length=254, verbose_name='email address'),
+            field=models.EmailField(
+                blank=True, max_length=254, verbose_name='email address'
+            ),
         ),
     ]

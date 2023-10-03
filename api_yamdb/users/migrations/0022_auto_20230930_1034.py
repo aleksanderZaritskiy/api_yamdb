@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0021_remove_myuser_username_is_not_me'),
     ]
@@ -27,7 +26,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='role',
-            field=models.CharField(choices=[('admin', 'Administrator'), ('moderator', 'Moderator'), ('user', 'User')], default='user', max_length=50),
+            field=models.CharField(
+                choices=[
+                    ('admin', 'Administrator'),
+                    ('moderator', 'Moderator'),
+                    ('user', 'User'),
+                ],
+                default='user',
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
             model_name='myuser',

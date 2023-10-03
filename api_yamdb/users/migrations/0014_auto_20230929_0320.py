@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0013_auto_20230929_0318'),
     ]
@@ -13,21 +12,41 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='bio',
-            field=models.TextField(blank=True, null=True, verbose_name='О себе'),
+            field=models.TextField(
+                blank=True, null=True, verbose_name='О себе'
+            ),
         ),
         migrations.AlterField(
             model_name='myuser',
             name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='Адрес электронной почты'),
+            field=models.EmailField(
+                max_length=254,
+                unique=True,
+                verbose_name='Адрес электронной почты',
+            ),
         ),
         migrations.AlterField(
             model_name='myuser',
             name='role',
-            field=models.CharField(choices=[('admin', 'Administrator'), ('moderator', 'Moderator'), ('user', 'User')], default='user', max_length=50, verbose_name='Роль'),
+            field=models.CharField(
+                choices=[
+                    ('admin', 'Administrator'),
+                    ('moderator', 'Moderator'),
+                    ('user', 'User'),
+                ],
+                default='user',
+                max_length=50,
+                verbose_name='Роль',
+            ),
         ),
         migrations.AlterField(
             model_name='myuser',
             name='username',
-            field=models.CharField(max_length=150, null=True, unique=True, verbose_name='Имя пользователя'),
+            field=models.CharField(
+                max_length=150,
+                null=True,
+                unique=True,
+                verbose_name='Имя пользователя',
+            ),
         ),
     ]

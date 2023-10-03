@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0016_alter_myuser_options'),
     ]
@@ -14,6 +13,17 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='username',
-            field=models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username'),
+            field=models.CharField(
+                error_messages={
+                    'unique': 'A user with that username already exists.'
+                },
+                help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
+                max_length=150,
+                unique=True,
+                validators=[
+                    django.contrib.auth.validators.UnicodeUsernameValidator()
+                ],
+                verbose_name='username',
+            ),
         ),
     ]

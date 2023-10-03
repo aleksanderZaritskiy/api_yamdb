@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0002_auto_20230928_0355'),
     ]
@@ -13,6 +12,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='myuser',
             name='confirmation_code',
-            field=models.CharField(max_length=200, verbose_name='Код подтверждения'),
+            field=models.CharField(
+                max_length=200, verbose_name='Код подтверждения'
+            ),
         ),
     ]

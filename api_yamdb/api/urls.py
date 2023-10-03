@@ -1,15 +1,35 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
-from users.views import UserViewSet, singup, get_jwt_token
+from users.views import UserViewSet, SignUpView, get_jwt_token
+from .views import (
+    CategoryViewSet,
+    GenreViewSet,
+    TitleViewSet,
+    ReviewsViewSet,
+    CommentsViewsSet,
+)
 
-router = DefaultRouter()
 
-router.register('users', UserViewSet, basename='users')
+VERSION_API = 'v1'
 
+router_v1 = SimpleRouter()
+
+router_v1.register('users', UserViewSet, basename='users')
+router_v1.register('categories', CategoryViewSet)
+router_v1.register('genres', GenreViewSet)
+router_v1.register('titles', TitleViewSet)
+router_v1.register(
+    r'titles/(?P<title_id>\d+)/reviews', ReviewsViewSet, basename='review'
+)
+router_v1.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentsViewsSet,
+    basename='comment',
+)
 
 urlpatterns = [
-    path('v1/', include(router.urls)),
-    path('v1/auth/signup/', singup, name='signup'),
-    path('v1/auth/token/', get_jwt_token, name='token')
+    path(f'{VERSION_API}/', include(router_v1.urls)),
+    path(f'{VERSION_API}/auth/signup/', SignUpView.as_view(), name='signup'),
+    path(f'{VERSION_API}/auth/token/', get_jwt_token, name='token'),
 ]

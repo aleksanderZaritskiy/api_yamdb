@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('users', '0001_initial'),
     ]
@@ -13,11 +12,15 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='myuser',
             name='confirmation_code',
-            field=models.CharField(max_length=200, null=True, verbose_name='Код подтверждения'),
+            field=models.CharField(
+                max_length=200, null=True, verbose_name='Код подтверждения'
+            ),
         ),
         migrations.AlterField(
             model_name='myuser',
             name='email',
-            field=models.EmailField(max_length=254, unique=True, verbose_name='Электронная почта'),
+            field=models.EmailField(
+                max_length=254, unique=True, verbose_name='Электронная почта'
+            ),
         ),
     ]
