@@ -1,7 +1,4 @@
-from datetime import date
-
 from django.conf import settings
-from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import (
@@ -11,6 +8,96 @@ from reviews.models import (
     Review,
     Comments,
 )
+from users.models import User
+from reviews.constants import LENGTH_USER_NAME, LENGTH_EMAIL
+
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=LENGTH_USER_NAME,
+    )
+
+    email = serializers.EmailField(
+        max_length=LENGTH_EMAIL,
+    )
+    bio = serializers.CharField(
+        required=False,
+        write_only=True,
+    )
+    first_name = serializers.CharField(
+        max_length=LENGTH_USER_NAME,
+        required=False,
+        write_only=True,
+    )
+    last_name = serializers.CharField(
+        max_length=LENGTH_USER_NAME,
+        required=False,
+        write_only=True,
+    )
+
+    def create(self, validated_data):
+
+        current_user = User.objects.filter(
+            username=validated_data.get('username'),
+            email=validated_data.get('email'),
+        ).exists()
+        current_email = User.objects.filter(
+            email=validated_data.get('email')
+        ).exists()
+        current_name = User.objects.filter(
+            username=validated_data.get('username')
+        ).exists()
+
+        if current_user:
+            return User.objects.get(**validated_data)
+
+        if not current_user and (current_email or current_name):
+            raise serializers.ValidationError(
+                'Пользователь с таким именем или почтой уже существует'
+            )
+
+        return User.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.email = validated_data.get("email", instance.email)
+        instance.first_name = validated_data.get(
+            "first_name", instance.first_name
+        )
+        instance.last_name = validated_data.get(
+            "last_name", instance.last_name
+        )
+        instance.bio = validated_data.get("bio", instance.bio)
+        instance.save()
+        return instance
+
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError('Данное имя запрещенно')
+        return value
+
+
+class UsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True, max_length=150)
+    confirmation_code = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -47,21 +134,13 @@ class CreateTitleSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('pub_date',)
 
-    def validate(self, data):
-        today = date.today()
-        if data.get('year') and data.get('year') > today.year:
-            raise serializers.ValidationError(
-                'Нельзя добавить произведение ещё не вышедшее'
-            )
-        return data
-
 
 class ReadTitleSerializer(serializers.ModelSerializer):
     """Read title"""
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
@@ -69,26 +148,12 @@ class ReadTitleSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'year',
-            'rating',
             'description',
             'genre',
             'category',
+            'rating',
         )
         read_only_fields = ('pub_date',)
-
-    def get_rating(self, obj):
-        reviews = obj.title_reviews.aggregate(Avg('score'))
-        if reviews.get('score__avg'):
-            return int((reviews.get)('score__avg'))
-        return None
-
-    def validate(self, data):
-        today = date.today()
-        if data.get('year') > today.year:
-            raise serializers.ValidationError(
-                'Нельзя добавить произведение ещё не вышедшее'
-            )
-        return data
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

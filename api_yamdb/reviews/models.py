@@ -1,26 +1,34 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from reviews.constants import MAX_SYMBOL, LENGTH_SLUG, LENGTH_NAME
+from .validators import validate_year
 
 User = get_user_model()
 
 
-class Category(models.Model):
-    name = models.CharField('Название категории', max_length=256)
-    slug = models.SlugField('Слаг', max_length=50, unique=True)
+class TypeOfArt(models.Model):
+    """Абстрактный класс для моделей category и genre"""
+
+    name = models.CharField(max_length=LENGTH_NAME)
+    slug = models.SlugField('Слаг', max_length=LENGTH_SLUG, unique=True)
 
     class Meta:
+        abstract = True
+
+
+class Category(TypeOfArt):
+    class Meta:
+        verbose_name = 'Category'
         verbose_name_plural = 'Categories'
 
     def __str__(self):
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField('Название жанра', max_length=256)
-    slug = models.SlugField('Слаг', max_length=50, unique=True)
-
+class Genre(TypeOfArt):
     class Meta:
+        verbose_name = 'Genre'
         verbose_name_plural = 'Genres'
 
     def __str__(self):
@@ -28,10 +36,13 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField('Название фильма', max_length=256)
-    year = models.IntegerField('Дата выхода')
+    name = models.CharField('Название фильма', max_length=LENGTH_NAME)
+    year = models.IntegerField(
+        'Дата выхода',
+        validators=(validate_year,),
+    )
     description = models.TextField('Описание', blank=True)
-    genre = models.ManyToManyField(Genre, through='GengeTitle')
+    genre = models.ManyToManyField(Genre)
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
@@ -42,34 +53,34 @@ class Title(models.Model):
         return self.name
 
 
-class GengeTitle(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+class UsersFeedBack(models.Model):
+    """Абстрактный класс для моделей review и comments"""
 
-    class Meta:
-        verbose_name_plural = 'GengeTitle'
-
-    def __str__(self):
-        return f'{self.title} : {self.genre}'
-
-
-class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='title_reviews',
+        related_name='title_%(class)s',
     )
-    text = models.TextField('Текст')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_reviews',
+        related_name='author_%(class)s',
     )
-    score = models.IntegerField('Оценка')
+    text = models.TextField('Текст')
     pub_date = models.DateTimeField(
         'Дата публикации оценки',
         auto_now_add=True,
     )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.text[:MAX_SYMBOL]
+
+
+class Review(UsersFeedBack):
+    score = models.IntegerField('Оценка')
 
     class Meta:
         verbose_name_plural = 'Reviews'
@@ -79,37 +90,16 @@ class Review(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.text[:50]
 
-
-class Comments(models.Model):
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='title_comments',
-    )
+class Comments(UsersFeedBack):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='review_comments',
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='author_comments',
-    )
-    text = models.TextField('Текст')
-    pub_date = models.DateTimeField(
-        'Дата публикации оценки',
-        auto_now_add=True,
-    )
 
     class Meta:
         verbose_name_plural = 'Comments'
-
-    def __str__(self):
-        return self.text[:50]
 
 
 class CsvImport(models.Model):

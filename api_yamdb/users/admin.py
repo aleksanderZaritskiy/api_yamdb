@@ -1,12 +1,20 @@
 from django.contrib import admin
 from django.urls import path
-from django.contrib.auth.admin import UserAdmin
 
 from reviews.admin import CsvImportAdmin
-from .models import MyUser
+from .models import User
 
 
-class MyUserAdmin(UserAdmin, CsvImportAdmin):
+class UserAdmin(admin.ModelAdmin, CsvImportAdmin):
+    list_display = (
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+        'bio',
+        'role',
+    )
+
     def get_urls(self):
         urls = super().get_urls()
         urls.insert(-1, path('csv-upload/', self.upload_csv))
@@ -15,7 +23,7 @@ class MyUserAdmin(UserAdmin, CsvImportAdmin):
     def upload_csv(self, request):
         return super().upload_csv(
             request,
-            MyUser,
+            User,
             [
                 'id',
                 'username',
@@ -28,6 +36,4 @@ class MyUserAdmin(UserAdmin, CsvImportAdmin):
         )
 
 
-UserAdmin.fieldsets += (('Extra Fields', {'fields': ('bio', 'role')}),)
-
-admin.site.register(MyUser, MyUserAdmin)
+admin.site.register(User, UserAdmin)

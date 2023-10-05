@@ -1,9 +1,12 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+from reviews.validators import validate_name
+from reviews.constants import LENGTH_ROLE, LENGTH_USER_NAME, LENGTH_EMAIL
 
-class MyUser(AbstractUser):
+
+class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'
@@ -13,26 +16,21 @@ class MyUser(AbstractUser):
         (USER, 'User'),
     ]
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, max_length=LENGTH_EMAIL)
     username = models.CharField(
-        max_length=150,
+        max_length=LENGTH_USER_NAME,
         unique=True,
-        validators=([RegexValidator(regex=r'^[\w.@+-]+$')]),
+        validators=(validate_name, UnicodeUsernameValidator()),
     )
-    role = models.CharField(max_length=50, choices=ROLES, default=USER)
+    role = models.CharField(
+        max_length=LENGTH_ROLE, choices=ROLES, default=USER
+    )
     bio = models.TextField(
         blank=True,
     )
-
-    confirmation_code = models.CharField(
-        max_length=40,
-        blank=True,
-        null=True,
-    )
-
-    first_name = models.CharField(max_length=150, blank=True)
+    first_name = models.CharField(max_length=LENGTH_USER_NAME, blank=True)
     last_name = models.CharField(
-        max_length=150,
+        max_length=LENGTH_USER_NAME,
         blank=True,
     )
 
@@ -42,7 +40,7 @@ class MyUser(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.ADMIN
+        return self.role == self.ADMIN or self.is_superuser
 
     class Meta:
         ordering = ['-id']

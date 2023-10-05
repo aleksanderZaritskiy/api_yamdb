@@ -14,7 +14,6 @@ from .models import (
     Genre,
     Review,
     Comments,
-    GengeTitle,
 )
 
 
@@ -43,13 +42,13 @@ class CsvImportAdmin:
                             for f in model._meta.get_fields()
                             if isinstance(f, ForeignKey)
                         ]
-                        for indx in range(len(fields)):
-                            if fields[indx] in fields_fk:
+                        for index in range(len(fields)):
+                            if fields[index] in fields_fk:
                                 model_atribute[
-                                    f'{fields[indx] + "_id"}'
-                                ] = row[indx]
+                                    f'{fields[index] + "_id"}'
+                                ] = row[index]
                             else:
-                                model_atribute[fields[indx]] = row[indx]
+                                model_atribute[fields[index]] = row[index]
 
                         if issubclass(Comments, model):
                             # Для модели Сomment подтягиваем pk title
@@ -78,21 +77,6 @@ class GenreAdmin(admin.ModelAdmin, CsvImportAdmin):
             request,
             Genre,
             ['id', 'name', 'slug'],
-        )
-
-
-@admin.register(GengeTitle)
-class GengeTitleAdmin(admin.ModelAdmin, CsvImportAdmin):
-    def get_urls(self):
-        urls = super().get_urls()
-        urls.insert(-1, path('csv-upload/', self.upload_csv))
-        return urls
-
-    def upload_csv(self, request):
-        return super().upload_csv(
-            request,
-            GengeTitle,
-            ['id', 'title_id', 'genre_id'],
         )
 
 

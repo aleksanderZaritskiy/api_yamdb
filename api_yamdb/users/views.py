@@ -12,42 +12,25 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.decorators import api_view, permission_classes
 
 from api.permissions import IsAdmin
-from .serializers import (
+from api.serializers import (
     SignUpSerializer,
     UsersSerializer,
     TokenSerializer,
 )
-from .models import MyUser
+from .models import User
 
 
 class SignUpView(CreateAPIView):
-    queryset = MyUser.objects.all()
+    queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = SignUpSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        current_user = MyUser.objects.filter(
-            username=request.data.get('username'),
-            email=request.data.get('email'),
-        ).exists()
-        current_email = MyUser.objects.filter(
-            email=request.data.get('email')
-        ).exists()
-        current_name = MyUser.objects.filter(
-            username=request.data.get('username')
-        ).exists()
+        serializer.save()
 
-        if not current_user and (current_email or current_name):
-            return Response(
-                'Пользователь с такими именем или почтой уже существует',
-                status=HTTPStatus.BAD_REQUEST,
-            )
-
-        user, exists = MyUser.objects.get_or_create(
-            **serializer.validated_data
-        )
+        user = User.objects.get(username=request.data.get('username'))
 
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
@@ -58,8 +41,6 @@ class SignUpView(CreateAPIView):
             fail_silently=False,
         )
 
-        user.confirmation_code = confirmation_code
-        user.save()
         return Response(data=serializer.data, status=HTTPStatus.OK)
 
 
@@ -69,7 +50,7 @@ def get_jwt_token(request):
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = get_object_or_404(
-        MyUser, username=serializer.validated_data['username']
+        User, username=serializer.validated_data['username']
     )
     if default_token_generator.check_token(
         user, serializer.validated_data['confirmation_code']
@@ -82,7 +63,7 @@ def get_jwt_token(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
-    queryset = MyUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = UsersSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (IsAdmin,)
@@ -109,5 +90,5 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
             return Response(serializer.data, status=HTTPStatus.OK)
-        serializer = SignUpSerializer(user)
+        serializer = UsersSerializer(user)
         return Response(serializer.data, status=HTTPStatus.OK)
