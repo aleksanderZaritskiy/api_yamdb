@@ -40,4 +40,4 @@ class IsAdmin(permissions.BasePermission):
     """Права к эндпоиту me/ с запросами patch, get"""
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated and (request.user.is_admin)
+        return request.user.is_authenticated and request.user.is_admin

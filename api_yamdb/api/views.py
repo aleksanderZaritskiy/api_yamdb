@@ -47,19 +47,9 @@ class SignUpView(CreateAPIView):
     serializer_class = SignUpSerializer
 
     def post(self, request, *args, **kwargs):
-        print('1')
-
         serializer = SignUpSerializer(data=request.data)
-
-        print('2')
         serializer.is_valid(raise_exception=True)
-
-        print(f'is_valid : {serializer.is_valid()}')
-
         user = serializer.save()
-
-        print('3')
-
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
             subject='Регистрация',
@@ -68,7 +58,6 @@ class SignUpView(CreateAPIView):
             recipient_list=[user.email],
             fail_silently=False,
         )
-
         return Response(data=serializer.data, status=HTTPStatus.OK)
 
 
