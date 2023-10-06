@@ -30,7 +30,6 @@ from .serializers import (
     SignUpSerializer,
     UsersSerializer,
     TokenSerializer,
-    UserUpdateSerializer,
 )
 from .permissions import (
     IsAuthorAdminSuperUserPermissions,
@@ -100,14 +99,13 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def owner_profile(self, request):
         user = request.user
+        serializer = self.get_serializer(user)
         if request.method == 'PATCH':
-            serializer = UserUpdateSerializer(
+            serializer = UsersSerializer(
                 user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
-        else:
-            serializer = UsersSerializer(user)
         return Response(serializer.data, status=HTTPStatus.OK)
 
 

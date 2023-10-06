@@ -44,20 +44,6 @@ class SignUpSerializer(serializers.Serializer):
         return value
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role',
-        )
-        read_only_fields = ('role',)
-
-
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
