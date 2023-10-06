@@ -16,27 +16,52 @@ class User(AbstractUser):
         (USER, 'User'),
     ]
 
-    email = models.EmailField(unique=True, max_length=LENGTH_EMAIL)
+    email = models.EmailField(
+        verbose_name='Электронная почта',
+        help_text=(
+            'Укажите свою электронную почту. '
+            'На неё вам придёт письмо с кодом подтвержедния'
+        ),
+        unique=True,
+        max_length=LENGTH_EMAIL,
+        error_messages={'max_length': "не валидный имейл больше 254 символов"},
+    )
     username = models.CharField(
+        verbose_name='Псевдоним',
+        help_text='Укажите ваш псевдоним',
         max_length=LENGTH_USER_NAME,
         unique=True,
         validators=(validate_name, UnicodeUsernameValidator()),
+        error_messages={'max_length': "больше 150 символов"},
     )
     role = models.CharField(
-        max_length=LENGTH_ROLE, choices=ROLES, default=USER
+        verbose_name='Роль',
+        help_text='Укажите роль пользователя',
+        max_length=LENGTH_ROLE,
+        choices=ROLES,
+        default=USER,
     )
     bio = models.TextField(
+        verbose_name='биография пользователя',
+        help_text='Укажите биография пользователя',
         blank=True,
     )
-    first_name = models.CharField(max_length=LENGTH_USER_NAME, blank=True)
+    first_name = models.CharField(
+        verbose_name='Имя',
+        help_text='Укажите имя',
+        max_length=LENGTH_USER_NAME,
+        blank=True,
+    )
     last_name = models.CharField(
+        verbose_name='Фамилия',
+        help_text='Укажите фамилию',
         max_length=LENGTH_USER_NAME,
         blank=True,
     )
 
     @property
     def is_moderator(self):
-        return self.role == self.MODERATOR
+        return self.role == self.MODERATOR or self.is_staff
 
     @property
     def is_admin(self):

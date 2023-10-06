@@ -1,13 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import SimpleRouter
 
-from users.views import UserViewSet, SignUpView, get_jwt_token
 from .views import (
     CategoryViewSet,
     GenreViewSet,
     TitleViewSet,
     ReviewsViewSet,
     CommentsViewsSet,
+    UserViewSet,
+    SignUpView,
+    get_jwt_token,
 )
 
 

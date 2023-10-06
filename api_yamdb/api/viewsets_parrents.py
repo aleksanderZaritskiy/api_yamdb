@@ -6,7 +6,7 @@ from rest_framework.mixins import (
 from rest_framework.viewsets import GenericViewSet
 
 
-class MixinsSet(
+class ViewSet(
     ListModelMixin,
     CreateModelMixin,
     DestroyModelMixin,

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 from reviews.models import (
@@ -8,74 +9,53 @@ from reviews.models import (
     Review,
     Comments,
 )
+from reviews.validators import validate_name
 from users.models import User
 from reviews.constants import LENGTH_USER_NAME, LENGTH_EMAIL
 
 
 class SignUpSerializer(serializers.Serializer):
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
+    username = serializers.CharField(
         max_length=LENGTH_USER_NAME,
+        validators=(
+            validate_name,
+            UnicodeUsernameValidator(),
+        ),
     )
-
     email = serializers.EmailField(
         max_length=LENGTH_EMAIL,
     )
-    bio = serializers.CharField(
-        required=False,
-        write_only=True,
-    )
-    first_name = serializers.CharField(
-        max_length=LENGTH_USER_NAME,
-        required=False,
-        write_only=True,
-    )
-    last_name = serializers.CharField(
-        max_length=LENGTH_USER_NAME,
-        required=False,
-        write_only=True,
-    )
 
     def create(self, validated_data):
-
-        current_user = User.objects.filter(
-            username=validated_data.get('username'),
-            email=validated_data.get('email'),
-        ).exists()
-        current_email = User.objects.filter(
-            email=validated_data.get('email')
-        ).exists()
-        current_name = User.objects.filter(
-            username=validated_data.get('username')
-        ).exists()
-
-        if current_user:
-            return User.objects.get(**validated_data)
-
-        if not current_user and (current_email or current_name):
+        try:
+            user, exists = User.objects.get_or_create(
+                email=validated_data.get('email'),
+                username=validated_data.get('username'),
+            )
+        except Exception:
             raise serializers.ValidationError(
                 'Пользователь с таким именем или почтой уже существует'
             )
-
-        return User.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        instance.username = validated_data.get("username", instance.username)
-        instance.email = validated_data.get("email", instance.email)
-        instance.first_name = validated_data.get(
-            "first_name", instance.first_name
-        )
-        instance.last_name = validated_data.get(
-            "last_name", instance.last_name
-        )
-        instance.bio = validated_data.get("bio", instance.bio)
-        instance.save()
-        return instance
+        return user
 
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Данное имя запрещенно')
         return value
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
+        read_only_fields = ('role',)
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -92,7 +72,10 @@ class UsersSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True, max_length=150)
+    username = serializers.CharField(
+        required=True,
+        max_length=LENGTH_USER_NAME,
+    )
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:

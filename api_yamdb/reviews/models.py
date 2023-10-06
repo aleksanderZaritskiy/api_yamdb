@@ -10,8 +10,17 @@ User = get_user_model()
 class TypeOfArt(models.Model):
     """Абстрактный класс для моделей category и genre"""
 
-    name = models.CharField(max_length=LENGTH_NAME)
-    slug = models.SlugField('Слаг', max_length=LENGTH_SLUG, unique=True)
+    name = models.CharField(
+        verbose_name='Название',
+        help_text='Укажите название',
+        max_length=LENGTH_NAME,
+    )
+    slug = models.SlugField(
+        verbose_name='Слаг',
+        help_text='Укажите слаг. Поле должно быть уникальным',
+        max_length=LENGTH_SLUG,
+        unique=True,
+    )
 
     class Meta:
         abstract = True
@@ -36,12 +45,21 @@ class Genre(TypeOfArt):
 
 
 class Title(models.Model):
-    name = models.CharField('Название фильма', max_length=LENGTH_NAME)
-    year = models.IntegerField(
-        'Дата выхода',
+    name = models.CharField(
+        verbose_name='Название произведения',
+        help_text='Укажите название произведения',
+        max_length=LENGTH_NAME,
+    )
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Дата выхода произведения',
+        help_text='Укажите дату выхода произведения',
         validators=(validate_year,),
     )
-    description = models.TextField('Описание', blank=True)
+    description = models.TextField(
+        verbose_name='Описание',
+        help_text='Опишите произведение',
+        blank=True,
+    )
     genre = models.ManyToManyField(Genre)
     category = models.ForeignKey(
         Category,
@@ -59,14 +77,15 @@ class UsersFeedBack(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='title_%(class)s',
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_%(class)s',
     )
-    text = models.TextField('Текст')
+    text = models.TextField(
+        verbose_name='Текст',
+        help_text='Введите текст',
+    )
     pub_date = models.DateTimeField(
         'Дата публикации оценки',
         auto_now_add=True,
@@ -80,7 +99,10 @@ class UsersFeedBack(models.Model):
 
 
 class Review(UsersFeedBack):
-    score = models.IntegerField('Оценка')
+    score = models.PositiveSmallIntegerField(
+        verbose_name='Оценка',
+        help_text='Оцените произведение от 1 до 10',
+    )
 
     class Meta:
         verbose_name_plural = 'Reviews'
@@ -89,17 +111,18 @@ class Review(UsersFeedBack):
                 fields=['author', 'title'], name='unique_review'
             )
         ]
+        default_related_name = 'review'
 
 
 class Comments(UsersFeedBack):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='review_comments',
     )
 
     class Meta:
         verbose_name_plural = 'Comments'
+        default_related_name = 'comments'
 
 
 class CsvImport(models.Model):
