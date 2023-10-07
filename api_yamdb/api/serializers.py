@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.db import IntegrityError
 from rest_framework import serializers
 
 from reviews.models import (
@@ -32,17 +33,12 @@ class SignUpSerializer(serializers.Serializer):
                 email=validated_data.get('email'),
                 username=validated_data.get('username'),
             )
-        except Exception:
+            return user
+        except IntegrityError:
             raise serializers.ValidationError(
                 'Пользователь с таким именем или почтой уже существует'
             )
-        return user
-
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError('Данное имя запрещенно')
-        return value
-
+        
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:

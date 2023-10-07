@@ -37,7 +37,7 @@ from .permissions import (
     IsAdmin,
 )
 from .filters import TitleFilter
-from .viewsets_parrents import ViewSet
+from .viewsets_parrents import ListCreateDestroyViewSet
 
 
 class SignUpView(CreateAPIView):
@@ -109,7 +109,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=HTTPStatus.OK)
 
 
-class CategoryViewSet(ViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     """Category endpoint"""
 
     queryset = Category.objects.all()
@@ -121,7 +121,7 @@ class CategoryViewSet(ViewSet):
     search_fields = ('name',)
 
 
-class GenreViewSet(ViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     """Genre endpoint"""
 
     queryset = Genre.objects.all()
