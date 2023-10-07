@@ -38,7 +38,7 @@ class SignUpSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'Пользователь с таким именем или почтой уже существует'
             )
-        
+
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
